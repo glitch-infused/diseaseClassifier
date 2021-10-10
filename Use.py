@@ -6,7 +6,7 @@ from typing import List
 DiseaseSymptoms = pd.read_csv("./DiseaseSymptoms.csv")
 SymptomSeverity = pd.read_csv("./SymptomSeverity.csv")
 DiseaseDescription = pd.read_csv("./DiseaseDescription.csv")
-DiseaseDescription = pd.read_csv("./DiseasePrecaution.csv")
+DiseasePrecaution = pd.read_csv("./DiseasePrecaution.csv")
 
 def GetClean(df: pd.DataFrame) -> pd.DataFrame:
     cols = df.columns
@@ -60,6 +60,7 @@ model = Model()
 with open("model.state", "rb") as f:
     model.load_state_dict(load(f))
 
+print()
 print("What are the symptoms?")
 sympt = input(">>> ")
 if sympt == '?':
@@ -71,4 +72,23 @@ if sympt == '?':
 sympt = sympt.split(", ")
 sympt = [s for s in sympt if s in Symptoms]
 
-print(SymptomsToDisease(model, sympt))
+disease = SymptomsToDisease(model, sympt)
+print()
+print(f"Detected disease: {disease}")
+descriptions = dict(zip(DiseaseDescription["Disease"], DiseaseDescription["Description"]))
+precautions = dict(zip(
+    DiseasePrecaution["Disease"],
+    ((a, b, c, d) for a, b, c, d in zip(
+        DiseasePrecaution["Precaution_1"],
+        DiseasePrecaution["Precaution_2"], 
+        DiseasePrecaution["Precaution_3"], 
+        DiseasePrecaution["Precaution_4"]
+    ))
+))
+print()
+print("Description: ")
+print()
+print(descriptions[disease].strip('"'))
+print()
+print("Precautions: ", end="")
+print('', *[p for p in precautions[disease] if p], sep="\n-")
