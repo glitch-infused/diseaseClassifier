@@ -1,7 +1,7 @@
 print("importing libraries ...")
 from typing import List
 import pandas as pd
-from torch import nn, full, tensor, save, rand
+from torch import nn, full, tensor, save, rand, load
 from torch.utils.data import Dataset, DataLoader
 from torch.optim import SGD
 from torch.cuda import is_available
@@ -37,7 +37,7 @@ Symptoms = SymptomSeverity["Symptom"].unique()
 
 IN_SIZE = Symptoms.shape[0]
 OUT_SIZE = Diseases.shape[0]
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 
 def SymptomsToInput(symptoms: List[str]):
     input = full((1, len(Symptoms)), 0.)
@@ -99,6 +99,8 @@ def RandomSymptomRemove(X: Tensor):
 device = "cuda" if is_available() else "cpu"
 
 model = Model().to(device)
+with open("model.state", "rb") as f:
+    model.load_state_dict(load(f))
 loss_fn = nn.CrossEntropyLoss()
 learning_rate = 0.01
 optimizer = SGD(model.parameters(), lr=learning_rate)
